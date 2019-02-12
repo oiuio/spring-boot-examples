@@ -1,0 +1,13 @@
+server:
+  port:
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://106.15.92.108:3306/test?characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+    username: admin
+    password: a123456
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
