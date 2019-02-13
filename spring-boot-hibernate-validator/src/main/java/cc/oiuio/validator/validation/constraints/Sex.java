@@ -19,6 +19,8 @@ import java.lang.annotation.Target;
 public @interface Sex {
 	String message() default "validate Sex message";
 
+	boolean require() default false;
+
 	Class<?>[] groups() default {};
 
 	Class<? extends Payload>[] payload() default {};
