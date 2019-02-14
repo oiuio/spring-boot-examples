@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author YunTianXiang
@@ -29,6 +30,12 @@ public class ValidatorExample implements Serializable {
 	private Boolean withFalse;
 
 	//日期检查
+	@Past(message = "Date 和 Calendar 对象过去时间")
+	private Date withPast;
+	@Future(message = "Date 和 Calendar 对象未来时间")
+	private Date withFuture;
+	@Pattern(regexp = "", message = "对象不符合正则表达式")
+	private Date withPattern;
 
 
 }
