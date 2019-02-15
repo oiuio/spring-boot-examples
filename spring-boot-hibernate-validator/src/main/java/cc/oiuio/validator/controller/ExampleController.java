@@ -1,28 +1,28 @@
 package cc.oiuio.validator.controller;
 
-import cc.oiuio.validator.module.Register;
+import cc.oiuio.validator.module.NullValidatorVO;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import javax.validation.Valid;
 
 /**
  * @author YunTianXiang
  * @Date 2019/2/13
  */
 @Controller
-public class MainController {
+public class ExampleController {
 
-	@PostMapping("/register")
+
+	@PostMapping("/nullValidator")
 	@ResponseBody
-	public Object register(@RequestBody @Valid Register register, BindingResult result) {
-		System.out.println(register);
+	public Object nullValidator(@RequestBody @Validated NullValidatorVO vo, BindingResult result) {
 		if (result.hasErrors()) {
 			return result.getFieldError().getDefaultMessage();
 		}
-		return "true";
+		return true;
 	}
+
 }
