@@ -11,7 +11,6 @@
     <modules>
         <module>spring-boot-jpa</module>
         <module>spring-boot-mybatis</module>
-        <module>spring-mvc-demo</module>
     </modules>
 
 
