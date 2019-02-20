@@ -6,3 +6,4 @@ spring:
     url: jdbc:mysql://106.15.92.108:3306/test?characterEncoding=utf8&useSSL=false&serverTimezone=UTC
     username: admin
     password: a123456
+

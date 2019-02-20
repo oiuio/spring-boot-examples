@@ -9,13 +9,14 @@ import javax.validation.constraints.Null;
 import java.util.List;
 
 /**
+ * 空检查
+ *
  * @author YunTianXiang
  * @Date 2019/2/15
  */
 @Data
 public class NullValidatorVO {
 
-	//空检查
 	@Null(message = "withNull 对象需为null")
 	private String withNull;
 	@NotNull(message = "withNotNull 对象需不为null")

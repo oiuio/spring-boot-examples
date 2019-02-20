@@ -10,6 +10,8 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 
 /**
+ * 配置自己的校验配置  主要开启了快速失败
+ *
  * @author YunTianXiang
  * @Date 2019/2/15
  */
