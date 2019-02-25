@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
 @Data
 public class NumericValidatorVO {
 	@Max(value = 100)
-	private String withMax;
+	private double withMax;
 	@Min(value = 10)
 	private String withMin;
 	@DecimalMax(value = "100.0")

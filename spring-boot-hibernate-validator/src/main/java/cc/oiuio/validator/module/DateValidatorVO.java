@@ -14,10 +14,9 @@ import java.util.Date;
 @Data
 public class DateValidatorVO {
 
-	@Past(message = "Date 和 Calendar 对象过去时间")
+	@Past(message = "Date 和 Calendar 对象需要为过去时间")
 	private Date withPast;
-	@Future(message = "Date 和 Calendar 对象未来时间")
+	@Future(message = "Date 和 Calendar 对象需要为未来时间")
 	private Date withFuture;
-	@Pattern(regexp = "", message = "对象不符合正则表达式")
-	private Date withPattern;
+
 }

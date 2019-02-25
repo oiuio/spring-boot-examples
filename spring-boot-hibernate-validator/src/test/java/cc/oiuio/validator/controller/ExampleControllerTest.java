@@ -3,9 +3,11 @@ package cc.oiuio.validator.controller;
 import cc.oiuio.validator.module.BooleanValidatorVO;
 import cc.oiuio.validator.module.DateValidatorVO;
 import cc.oiuio.validator.module.NullValidatorVO;
+import cc.oiuio.validator.module.NumericValidatorVO;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,12 +86,10 @@ public class ExampleControllerTest {
 	public void dateValid() throws Exception {
 		DateValidatorVO vo = new DateValidatorVO();
 		//这个参数必须是过去的时间
-		DateTime now = new DateTime("2019/2/21");
+		DateTime now = new DateTime("2018-1-1");
 		vo.setWithPast(now.toDate());
-//
-//		vo.setWithFuture();
-//
-//		vo.setWithPattern();
+		//这个参数必须是未来的时间
+		vo.setWithFuture(new DateTime("2018-1-1").toDate());
 
 		MvcResult result = mvc.perform(post("/dateValid")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -101,6 +101,16 @@ public class ExampleControllerTest {
 	}
 
 	@Test
-	public void numericValid() {
+	public void numericValid() throws Exception {
+		NumericValidatorVO vo = new NumericValidatorVO();
+		vo.setWithMax(100.1);
+
+		MvcResult result = mvc.perform(post("/numericValid")
+				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.content(JSONObject.toJSONString(vo)))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		log.debug("result : {}",result.getResponse().getContentAsString());
 	}
 }
