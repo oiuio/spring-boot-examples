@@ -17,6 +17,7 @@
         <module>spring-boot-hibernate-validator</module>
         <module>spring-boot-jpa</module>
         <module>spring-boot-mybatis</module>
+        <module>geekbang</module>
     </modules>
 
 

@@ -3,7 +3,6 @@ package cc.oiuio.validator.module;
 import lombok.Data;
 
 import javax.validation.constraints.*;
-import java.util.List;
 
 /**
  * 布尔检查

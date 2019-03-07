@@ -1,9 +1,6 @@
 package cc.oiuio.validator.controller;
 
-import cc.oiuio.validator.module.BooleanValidatorVO;
-import cc.oiuio.validator.module.DateValidatorVO;
-import cc.oiuio.validator.module.NullValidatorVO;
-import cc.oiuio.validator.module.NumericValidatorVO;
+import cc.oiuio.validator.module.*;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -106,6 +103,22 @@ public class ExampleControllerTest {
 		vo.setWithMax(100.1);
 
 		MvcResult result = mvc.perform(post("/numericValid")
+				.contentType(MediaType.APPLICATION_JSON_UTF8)
+				.content(JSONObject.toJSONString(vo)))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		log.debug("result : {}",result.getResponse().getContentAsString());
+	}
+
+	@Test
+	public void groupsValid() throws Exception{
+		GroupValidatorVO vo = new GroupValidatorVO();
+//		vo.setName("姑姑");
+//		vo.setId("id");
+		vo.setSex("1212");
+
+		MvcResult result = mvc.perform(post("/groupsValid")
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
 				.content(JSONObject.toJSONString(vo)))
 				.andExpect(status().isOk())
