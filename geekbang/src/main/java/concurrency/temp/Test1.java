@@ -16,8 +16,16 @@ public class Test1 {
 
 	public static long calc() throws InterruptedException {
 		final Test1 test1 = new Test1();
-		Thread th1 = new Thread(test1::add10K);
-		Thread th2 = new Thread(test1::add10K);
+		Thread th1 = new Thread(new Runnable() {
+			public void run() {
+				test1.add10K();
+			}
+		});
+		Thread th2 = new Thread(new Runnable() {
+			public void run() {
+				test1.add10K();
+			}
+		});
 		th1.start();
 		th2.start();
 		th1.join();
