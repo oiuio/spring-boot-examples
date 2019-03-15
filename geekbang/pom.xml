@@ -12,6 +12,24 @@
     <groupId>cc.oiuio</groupId>
     <artifactId>geekbang</artifactId>
 
+    <dependencies>
+
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.6</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+
     <build>
         <plugins>
             <!-- java编译插件 -->
@@ -27,5 +45,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>

@@ -10,6 +10,16 @@ public class Account {
 	protected Integer balance;
 	protected final Object pwLock = new Object();
 	protected String password;
+	protected Object objLock;
+
+
+	public Account(Object o) {
+		this.objLock = o;
+	}
+
+	public Account() {
+
+	}
 
 	//取款
 	void withDraw(Integer amt) {
@@ -27,11 +37,20 @@ public class Account {
 		}
 	}
 
+	void transfer(Account target, int amt) {
+		synchronized (Account.class) {
+			if (this.balance > amt) {
+				this.balance -= amt;
+				target.balance += amt;
+			}
+		}
+	}
+
 	//更改密码
 	void updatePassword(String pwd) {
-//		synchronized (pwLock) {
+		synchronized (pwLock) {
 			this.password = pwd;
-//		}
+		}
 	}
 
 	//查看密码

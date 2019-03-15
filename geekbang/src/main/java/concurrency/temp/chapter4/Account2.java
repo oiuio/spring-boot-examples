@@ -21,7 +21,7 @@ public class Account2 {
 		}
 	}
 
-	//查看余额
+	//查看余额 get 也要使用锁是重点
 	synchronized Integer getBalance() {
 //		synchronized (balLock) {
 		return balance;
