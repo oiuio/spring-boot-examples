@@ -1,20 +1,22 @@
 package concurrency.temp.chapter5;
 
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author YunTianXiang
  * @Date 2019/3/15
  */
 public class Account1 {
+	protected String name;
 	protected int balance;
 
-	void transfer(Account1 account, int amt) {
+	void transfer(Account1 target, int amt) {
 		synchronized (this) {
-			synchronized (account) {
+			synchronized (target) {
 				if (this.balance > amt) {
 					balance -= amt;
-					account.balance += amt;
+					target.balance += amt;
+				} else {
+					System.out.println(name + "没转成功" + ",钱=" + balance + ";" + target.name + "钱=" + target.balance);
 				}
 			}
 		}
