@@ -7,18 +7,15 @@ import lombok.extern.slf4j.Slf4j;
  * @Date 2019/3/18
  */
 @Slf4j
-public class Demo2 {
+public class Demo3 {
 
 	public static void main(String[] args) throws InterruptedException {
-		Allocator allocator = new Allocator();
 
-		Account2 accountA = new Account2();
-		accountA.id = 1;
-		accountA.actr = allocator;
+		Account3 accountA = new Account3();
+		accountA.id = 2;
 		accountA.balance = 1000;
-		Account2 accountB = new Account2();
-		accountB.id = 2;
-		accountB.actr = allocator;
+		Account3 accountB = new Account3();
+		accountB.id = 1;
 		accountB.balance = 1000;
 
 		Thread threadA = new Thread(() -> {
@@ -37,8 +34,6 @@ public class Demo2 {
 
 		threadA.join();
 		threadB.join();
-		log.debug("AccountA failed = {}",allocator.intA);
-		log.debug("AccountB failed = {}",allocator.intB);
 
 		log.debug("accountA Balance = {}", accountA.balance);
 		log.debug("accountB Balance = {}", accountB.balance);

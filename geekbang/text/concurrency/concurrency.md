@@ -118,3 +118,27 @@
 * 目前 synchronized 做不到 , 在synchronized申请资源时如果申请不到 , 线程直接进入阻塞状态
 
 ### 破坏循环等待条件
+* 破坏这个条件,需要先队资源进行排序,然后按需申请资源,避免出现T1等待T2,T2等待T1
+
+## 06.用"等待-通知"机制优化循环等待
+* 等待-通知机制可以有多种实现方式, Java语言内置的 synchronized 配合 wait(),notify(),notifyAll()这三个方法可以轻松实现
+
+> 当一个线程进入 synchronized 保护的临界区,其他线程只能进入(左边)等待队列里等待. **这个等待队列和互斥锁市一对一的关系,每个互斥锁都有自己独立的等待队列**
+> 当调用wait()方法后, 当前线程会被阻塞,并且进入(右边)等待队列,这个等待队列也是 **互斥锁的等待队列** . 线程在进入等待队列的同时, **会释放持有的互斥锁** ,线程释放锁后,其他线程就有机会持有锁并进入临界区
+> 当线程要求的条件满足时,通过java对象的notify()和notifyAll()方法,通知等待队列 **(互斥锁的等待队列)** 中的线程,告诉它条件 **曾经满足过**
+
+* notify()只能保证在通知时间点,条件是满足的 , 执行时间点是否满足还得重新判断
+* wait(),notify(),notifyAll()操作的都是互斥锁的等待对俄,如果 synchronized 锁的是this,那么就是this.wait(),notify()... 如果锁的是target那么就是 target.wait()...
+* wait(),notify(),notifyAll()能被调用的前提是已经获取了相应的互斥锁,它们都是在 synchronized{}内部被调用的, 如果在外部调用会抛出IllegalMonitorStateException
+
+### 尽量使用 notifyAll
+* notify()会随机通知等待队列中的一个线程,而notifyAll会通知等待线程中的所有线程, 有可能使线程永远没机会被唤醒
+
+### 思考: wait()和sleep()的区别
+* wait会释放锁 sleep不会释放
+* wait只能在同步方法和同步块中调用 sleep可在任何地方
+* wait是Object的方法 sleep是Thread的方法
+* wait无需捕获异常 , sleep需要
+* sleep需要指定等待时间
+
+## 07.安全性,活跃性以及性能问题

@@ -1,4 +1,4 @@
-package concurrency.temp.chapter5;
+package concurrency.temp.chapter6;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -7,16 +7,16 @@ import lombok.extern.slf4j.Slf4j;
  * @Date 2019/3/18
  */
 @Slf4j
-public class Demo2 {
+public class Demo {
 
 	public static void main(String[] args) throws InterruptedException {
 		Allocator allocator = new Allocator();
 
-		Account2 accountA = new Account2();
+		Account accountA = new Account();
 		accountA.id = 1;
 		accountA.actr = allocator;
 		accountA.balance = 1000;
-		Account2 accountB = new Account2();
+		Account accountB = new Account();
 		accountB.id = 2;
 		accountB.actr = allocator;
 		accountB.balance = 1000;
@@ -39,6 +39,7 @@ public class Demo2 {
 		threadB.join();
 		log.debug("AccountA failed = {}",allocator.intA);
 		log.debug("AccountB failed = {}",allocator.intB);
+
 
 		log.debug("accountA Balance = {}", accountA.balance);
 		log.debug("accountB Balance = {}", accountB.balance);

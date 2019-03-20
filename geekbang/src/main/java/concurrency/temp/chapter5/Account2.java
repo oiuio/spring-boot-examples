@@ -6,6 +6,7 @@ package concurrency.temp.chapter5;
  */
 public class Account2 {
 	//单例
+	protected int id;
 	protected Allocator actr;
 	protected int balance;
 
@@ -14,7 +15,7 @@ public class Account2 {
 		try {
 			synchronized (this) {
 				synchronized (target) {
-					if (this.balance > amt) {
+					if (this.balance >= amt) {
 						this.balance -= amt;
 						target.balance += amt;
 					}

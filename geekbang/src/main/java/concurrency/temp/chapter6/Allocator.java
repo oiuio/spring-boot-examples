@@ -1,4 +1,4 @@
-package concurrency.temp.chapter5;
+package concurrency.temp.chapter6;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,23 +13,26 @@ public class Allocator {
 	protected int intA = 0;
 	protected int intB = 0;
 
-	synchronized boolean apply(Account2 from, Account2 to) {
-		if (als.contains(from) || als.contains(to)) {
+	synchronized void apply(Account from, Account to) {
+		while (als.contains(from) || als.contains(to)) {
 			if (from.id == 1) {
 				intA++;
 			} else {
 				intB++;
 			}
-			return false;
-		} else {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 			als.add(from);
 			als.add(to);
-		}
-		return true;
 	}
 
-	synchronized void free(Account2 from, Account2 to) {
+	synchronized void free(Account from, Account to) {
 		als.remove(from);
 		als.remove(to);
+		notifyAll();
 	}
 }
