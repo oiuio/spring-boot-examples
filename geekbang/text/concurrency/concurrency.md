@@ -200,8 +200,72 @@
 * 在操作系统层面,BLOCKED,WAITING,TIMED_WAITING 就是休眠状态,JAVA线程处于三种状态之一,就永远没有CPU使用权
 ![通用线程状态转换图-Java 中的线程状态转换图](https://static001.geekbang.org/resource/image/3f/8c/3f6c6bf95a6e8627bdf3cb621bbb7f8c.png)
 
-1. RUNNABLE 与 BLOCKED 的状态转换
+####1. RUNNABLE 与 BLOCKED 的状态转换
 只有在等待synchronized的隐式锁时,被阻塞的线程会转换恶的BLOCKED状态.
 JVM不关心操作系统调度状态,它认为等待CPU与I/O没有区别,所以调用阻塞API并不会使线程发生状态改变.
 
-2. RUNNABLE 于 WAITING 的状态转换
+####2. RUNNABLE 与 WAITING 的状态转换
+场景一. 获得synchronized隐式锁的线程,调用无参数的Object.wait()
+场景二. 调用无参数的Thread.join(). eg. Thread B中调用 Thread A.join,B:RUNNABLE->WAITING,当A执行完,B:WAITING->RUNNABLE
+场景三. 调用LockSupport.park(),LockSupport,Java中并发包的锁都是基于其实现. 调用其方法,当前线程会阻塞,调用LockSupport.unpark(Thread)可以唤醒目标线程
+
+####3. RUNNABLE 与 TIMED_WAITING 的状态转换
+1. 调用带**超时参数**的 Thread.sleep(long millis)
+2. 获得synchronized隐式锁的线程,调用带**超时参数**的Object.wait(long timeout)
+3. 调用带**超时参数**的 Thread.join(long millis)
+4. 调用带**超时参数**的 LockSupport.parkNanos(Object blocker,long deadline)
+5. 调用带**超时参数**的 LockSupport.parkUntil(long deadLine)
+WAITING 与 TIMED_WAITING 状态的区别,仅仅屎因为触发条件多了**超时参数**
+
+####4. 从NEW 到 RUNNABLE 状态
+Java刚创建出来的Thread对象就是New状态:继承Thread对象重写run(),实现Runnable()接口重写run()
+
+####5. 从RUNNABLE 到 TERMINATED 状态
+线程执行完后自动切换到 TERMINATED 状态, 在执行run() 抛出异常线程也会终止.
+也可以手动调用 stop() interrupt()终止线程
+
+##### stop() interrupt()区别:
+* stop立刻杀死线程,如果线程持有ReentrantLock锁
+* interrupt()紧紧是通知线程,线程有机会执行一些后续操作同时也可以无视通知. 通过异常,主动检测来接收通知
+**interrupt()抛出异常后会清空中断标识,需要手动重置**
+
+异常通知:
+当线程A处于 WAITING ,TIMED_WAITING 状态时, 其他线程调用了A的 interrupt方法,会使A返回 RUNNABLE状态 , 同时A的代码会触发 InterruptException.转换到WAITING TIMED_WAITING的触发条件都是调用了 wait() sleep() join()方法 , 这些方法都会抛出InterruptException,这个异常的触发条件就是其他线程调用了该线程的interrupt
+当线程A处于 RUNNABLE状态时 , 并且阻塞在 java.nio.channels.InterruptibleChannel时,其他线程调用了A的 interrupt(),A触发ClosedByInterruptException;阻塞在java.nio.channels.Selector上时,调用interrupt会使Selector立即返回
+主动检测:
+在线程处于RUNNABLE且没有阻塞在I/O操作上则依赖线程A的主动检测,通过调用自身的isInterrupt()来检测自身是否被中断
+
+## 10.Java线程(中):创建多少线程才合适
+运用多线程是为了**降低延迟,提高吞吐量** ,对应方法:**优化算法**,**发挥硬件性能极致** , 在并发领域就是为了 **提高I/O,CPU利用率**.
+* 如果CPU和I/O设备利用率都很低 , 可以尝试增加线程来提高吞吐量
+* 对于CPU密集型计算,理论上"线程数量=CPU核数"最合适,工程上一般会设置为"CPU核数+1",因为线程可能会因为某些原因阻塞.
+* 对于I/O密集型计算,最佳线程数=1+(I/O耗时 / CPU 耗时), 意思为每个I/O等待中可以再处理几个CPU线程,多核系统中将结果再乘以CPU核数(一般使用逻辑核数)
+
+* 具体最佳配置还是需要进行压测,apm工具精确到方法耗时 apache ab,apache JMeter
+
+## 10.Java线程(下):为什么局部变量是线程安全的
+
+* 方法是如何执行的
+```java
+int a = 7;
+int [] b = fibonacci(a);
+int [] c = b;
+```
+![方法的调用过程](https://static001.geekbang.org/resource/image/9b/1f/9bd881b545e1c67142486f6594dc9d1f.png)
+
+* 当调用fibonacci()时,CPU先找到这个方法的地址,然后跳转到这个地址执行CPU代码,再执行完方法后,又会跳入下一个地址
+* e.g 有三个方法A,B,C 调用关系为A->B->C 在运行时会构建出如下调用栈,每个方法在调用栈里都会有自己的独立空间,称为**栈帧**,每个栈帧有对应方法需要的参数和返回地址. 当调用方法时会创建新的栈帧,并压入调用栈,当方法返回时,对应的栈帧就会被自动弹出,栈帧和方法是同生共死的
+![调用栈结构](https://static001.geekbang.org/resource/image/67/c7/674bb47feccbf55cf0b6acc5c92e4fc7.png)
+
+* 局部变量的作用域是方法内部. 局部变量应该和方法同生共死. 局部变量就是放在了调用栈里
+![保护局部变量的调用栈结构](https://static001.geekbang.org/resource/image/ec/9c/ece8c32d23e4777c370f594c97762a9c.png)
+
+* 每个线程都有自己的独立的调用栈. 所以综上没有共享,没有并发问题.
+* **线程封闭**: 单线程内访问数据. 方法里的局部变量没有共享,不会有并发问题,成为了一种解决并发问题的重药技术.
+* 递归时,因为每调用一次方法就会创建新的栈帧,如果不控制栈大小就会出现栈溢出
+* new 的对象在堆里,引用(句柄)在栈里
+
+
+
+
+
