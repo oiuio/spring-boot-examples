@@ -282,13 +282,44 @@ int [] c = b;
 
 ## 14.Lock和Condition(上):隐藏在并发包中的管程
 
+* 并发编程的核心问题: **互斥** 与 **同步**
+* JavaSDK 并发包通过 **Lock** 和 **Condition** 两个接口来实现管程 . **Lock解决互斥问题 , Condition解决同步问题**
+
+死锁问题中 synchronized 不能解决 **破坏不可抢占条件** 方案 , 当 synchronized 申请资源时,如果申请不到线程则直接阻塞, 也不会释放已占有资源
+如果重新设计锁来解决问题又三种方案:
+1. 能够相应中断. 当进入阻塞状态时,可以发送中断相应唤醒线程并让他释放资源
+2. 支持超时. 在一定时间内没有获取锁,不是进入阻塞状态而是返回错误,并释放资源
+3. 非阻塞地获取锁. 当获取锁失败时,并不进入阻塞状态耳式直接返回,并释放锁
+
+Lock接口中体现如下
+```java
+//支持中断的api
+void lockInterruptibly() throw InterruptException;
+//支持超时的api
+boolean tryLock(long time,TimeUnit unit)  throw InterruptException;
+//支持非阻塞获取锁的api
+boolean tryLock();
+```
+保证可见性: ReentrantLock持有一个volatile变量state 在lock与unlock时分别进行操作,对value操作在中间,根据顺序性,volatile原则,传递性原则保证不同线程的可见性
+
+### 可重入锁
+可重入锁: 线程可以重复获取同一把锁
+可重入函数: 多个线程可以同时调用该函数. 每个线程都能得到正确结果, 同时在一个线程内支持线程切换
+
+### 公平锁与非公平锁
+在使用ReentrantLock时,它提供两个两个构造函数 一个是无参 一个是传入fair参数 , fair代表锁的公平策略,true为构造公平锁,false则构造非公平锁
+公平锁:等待队列中,谁等待的时间长就唤醒谁
+非公平锁:不提供公平保证
+
+### 用锁的最佳时间
+1. 永远只在更新对象的成员变量时加锁
+2. 永远旨在访问可变的成员变量时加锁
+3. 永远不在调用其他对象的方法时加锁
+
+
 ## 15.Lock和Condition(下):Dubbo如何用管程实现异步转同步
-
-
-
-
-
-
+Condition实现了管程中的条件变量
+ 
 
 
 
