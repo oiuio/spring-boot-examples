@@ -7,6 +7,9 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * 阻塞队列
+ */
 public class BlockedQueue<T> {
 
     final Lock lock = new ReentrantLock();
@@ -14,8 +17,9 @@ public class BlockedQueue<T> {
     final Condition notFull = lock.newCondition();
     //队列不空:允许出队
     final Condition notEmpty = lock.newCondition();
-
+    //队列
     private List<T> array = new ArrayList<>();
+    //最大长度为10
     private int max = 10;
 
     //入队
