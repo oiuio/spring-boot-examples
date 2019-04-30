@@ -4,6 +4,9 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * 竞太条件
+ */
 public class SafeWM {
 
     private final AtomicLong upper = new AtomicLong(0);
