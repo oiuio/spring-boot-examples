@@ -49,6 +49,7 @@ public class SafeWM {
                 safeWM.setLower(random.nextInt(100));
             }
         });
+
         Thread threadB = new Thread(() -> {
             countDownLatch.countDown();
             try {
