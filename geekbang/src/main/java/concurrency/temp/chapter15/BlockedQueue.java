@@ -70,7 +70,7 @@ public class BlockedQueue<T> {
             for (int i = 0; i < 100; i++) {
                 queue.enq(i + "");
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -81,7 +81,7 @@ public class BlockedQueue<T> {
             for (int i = 0; i < 100; i++) {
                 System.out.println(queue.deq());
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

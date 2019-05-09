@@ -318,7 +318,13 @@ boolean tryLock();
 
 
 ## 15.Lock和Condition(下):Dubbo如何用管程实现异步转同步
-Condition实现了管程中的条件变量
+
+* 同步与异步: 调用方是否需要等待结果,同步:是,异步:否
+* Lock,Condition实现的管程线程的等待与通知: await(),signal(),signalAll()
+* synchronized的线程的等待与通知: wait(),notify(),notifyAll()
+
+## 17.
+
  
 
 
