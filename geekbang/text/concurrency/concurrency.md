@@ -323,7 +323,14 @@ boolean tryLock();
 * Lock,Condition实现的管程线程的等待与通知: await(),signal(),signalAll()
 * synchronized的线程的等待与通知: wait(),notify(),notifyAll()
 
-## 17.
+## 17.Semaphore: 如何快速实现一个限流器
+* 普遍翻译为:信号量 , 类似红绿灯
+* 模型: 一个计数器 , 一个等待队列 , 三个方法{init,down,up} 保证为原子性操作
+ * init:设置计数器初始值
+ * down:计数器减1,若值小于0,当前线程被阻塞,否则继续执行
+ * up:计数器加1,若值小于等于0,则唤醒等待队列中的一个线程,并将其从等待队列中移除
+ * 信号量中down,up最早成为P,V操作,信号量模型也被成为PV原语,JDK中对应acquire和release
+*
 
  
 
