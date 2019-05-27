@@ -323,16 +323,30 @@ boolean tryLock();
 * Lock,Condition实现的管程线程的等待与通知: await(),signal(),signalAll()
 * synchronized的线程的等待与通知: wait(),notify(),notifyAll()
 
-## 17.Semaphore: 如何快速实现一个限流器
+## 16.Semaphore: 如何快速实现一个限流器
 * 普遍翻译为:信号量 , 类似红绿灯
 * 模型: 一个计数器 , 一个等待队列 , 三个方法{init,down,up} 保证为原子性操作
  * init:设置计数器初始值
  * down:计数器减1,若值小于0,当前线程被阻塞,否则继续执行
  * up:计数器加1,若值小于等于0,则唤醒等待队列中的一个线程,并将其从等待队列中移除
  * 信号量中down,up最早成为P,V操作,信号量模型也被成为PV原语,JDK中对应acquire和release
-*
+* Semaphore: acquire() release()
 
+ ## 17.ReadWriteLock: 如何快速实现一个完备的缓存
+* 适用于:读多写少
+* 读写锁三条基本原则
+ * 允许多个线程同时读共享变量
+ * 只允许一个线程写共享变量
+ * 如果一个线程正在执行写操作 , 此时禁止线程读共享变量
  
+* 写锁能降级程都锁, 但读锁不能升级为写锁
+
+* ReadWriteLock 是一个接口, 可以使用ReentrantReadWriteLock
+ * 获取写锁的前提是读写锁都未被占用
+ * 获取读锁的前提是写锁未被占用
+ * 申请写锁不中断其他线程申请读锁
+ * 公平锁如果有写申请,能禁止读锁
+
 
 
 
