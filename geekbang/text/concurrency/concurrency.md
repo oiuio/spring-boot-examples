@@ -332,7 +332,7 @@ boolean tryLock();
  * 信号量中down,up最早成为P,V操作,信号量模型也被成为PV原语,JDK中对应acquire和release
 * Semaphore: acquire() release()
 
- ## 17.ReadWriteLock: 如何快速实现一个完备的缓存
+## 17.ReadWriteLock: 如何快速实现一个完备的缓存
 * 适用于:读多写少
 * 读写锁三条基本原则
  * 允许多个线程同时读共享变量
@@ -343,13 +343,24 @@ boolean tryLock();
 
 * ReadWriteLock 是一个接口, 可以使用ReentrantReadWriteLock
  * 获取写锁的前提是读写锁都未被占用
- * 获取读锁的前提是写锁未被占用
+ * 获取读锁的前提是写锁未被占用 (写锁与读锁互斥)
  * 申请写锁不中断其他线程申请读锁
  * 公平锁如果有写申请,能禁止读锁
+ 
+# 18.StampedLock: 比读写锁更快的锁
+* 支持三种模式: 写锁,悲观读锁,乐观读(无锁) ; 写锁与读锁互斥,只允许一个线程读锁
+* 在写锁与悲观读锁加锁成功后会返回stamped解锁时需要在传入
+* 与读写锁不同,在乐观读时,允许一个线程获取写锁
+* 注意:
+ * StampedLock是ReadWriteLock的子集,没有Reentrant不支持重入.
+ * 悲观读锁,写锁不支持条件变量
+ * 如果线程阻塞在readLock()或writeLock()时,调用阻塞线程的interrupt()方法会使cpu飙升到100%
+ * 使用StampedLock一定不要调用中断操作,如果需要要使用可中断的readLockInterruptibly()和writeLockInterruptibly();
+ 
+# 19.CountDownLatch和CycleBarrier: 让多线程步调一致
 
-
-
-
+* CountDownLatch: 解决一个线程等待多个线程的场景
+* CycleBarrier: 解决一组线程互相等待 , 计数器自动重置可重复利用
 
 
 
