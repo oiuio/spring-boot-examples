@@ -1,5 +1,6 @@
 package concurrency.temp.chapter19;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.BrokenBarrierException;
@@ -25,14 +26,23 @@ public class CycleBarrierDemo {
     }
 
     List<String> check(String p, String d) {
-        return null;
+        List<String> pos1 = new ArrayList<>(pos);
+        List<String> dos1 = new ArrayList<>(dos);
+
+        List<String> result = new ArrayList<>();
+        pos.removeAll(dos1);
+        result.addAll(pos);
+        dos.removeAll(pos1);
+        result.addAll(dos);
+
+        return result;
     }
 
     void checkAll() {
         Thread T1 = new Thread(() -> {
             while (Boolean.TRUE) {
                 try {
-                    pos.add(getPOrders());
+                    pos.addAll(getPOrders());
                     barrier.await();
                 } catch (InterruptedException | BrokenBarrierException e) {
                     e.printStackTrace();
@@ -43,7 +53,7 @@ public class CycleBarrierDemo {
         Thread T2 = new Thread(() -> {
             while (Boolean.TRUE) {
                 try {
-                    dos.add(getDOrders());
+                    dos.addAll(getDOrders());
                     barrier.await();
                 } catch (InterruptedException | BrokenBarrierException e) {
                     e.printStackTrace();
@@ -52,4 +62,28 @@ public class CycleBarrierDemo {
         });
         T2.start();
     }
+    private static List<String> getPOrders() {
+        List<String> list = new ArrayList<>();
+        list.add("1");
+        list.add("2");
+        list.add("3");
+        return list;
+    }
+
+    private static List<String> getDOrders() {
+        List<String> list = new ArrayList<>();
+        list.add("2");
+        list.add("3");
+        list.add("4");
+        return list;
+    }
+
+    private void save(List<String> diff) {
+        System.out.println(diff.toString());
+    }
+
+    public static void main(String[] args) {
+        new CycleBarrierDemo().checkAll();
+    }
+
 }

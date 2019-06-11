@@ -361,6 +361,153 @@ boolean tryLock();
 
 * CountDownLatch: 解决一个线程等待多个线程的场景
 * CycleBarrier: 解决一组线程互相等待 , 计数器自动重置可重复利用
+ * 回调函数执行再一个回合里最后执行await()的线程上,同步调用回调函数,执行完后才开始第二回合. 回调函数另开线程可以异步
+
+# 20.并发容器: 都有哪些"坑"需要填
+## 同步容器注意事项
+* Java主要容器分为: List Map Set Queue 四大类,但并不是所有容器都是线程安全的
+* ArrayList HashMap 非线程安全
+* 坑1: **组合操作存在竞太条件问题** , 即便每个操作都能保证原子性 , 也不能保证组合操作的原子性
+* 坑2: **用迭代器遍历容器** , 迭代中对元素进行操作
+* 基于 **synchronized** 同步关键字实现的容器被称为 **同步容器**
+* 还有有: Vector Stack Hashtable
+
+## 并发容器及其注意事项
+* 1.5版本前主要都是同步容器,1.5之后提供了许多并发容器,依旧为 List Map Set Queue 四大类
+![并发容器关系图](https://static001.geekbang.org/resource/image/a2/1d/a20efe788caf4f07a4ad027639c80b1d.png)
+
+### List
+* 只有一个实现类:CopyOnWriteArrayList. 写入时会将共享变量复制一分
+ * 读取遍历都在原数组A上执行,在写入时会复制一分数组B在B上进行写入,随后再将A指向B
+ * 坑:
+  * 使用场景:读多写少,且能容忍读写的短暂不一致
+  * 迭代器是只读的,不支持增删改. 因为迭代器遍历的仅仅是快照
+  
+### Map
+* 实现接口: ConcurrentHashMap 和 ConcurrentSkipListMap 
+* ConcurrentHashMap 的 key 是 **无序** 的 , ConcurrentSkipListMap 的 key 是 **有序** 的
+* key 与 value 都不能为空 ,否则会 NullPointerException
+* ConcurrentSkipListMap 跳表. 跳表的插入,删除,查询操作平均时间复杂度为 O(log n)理论上和并发线程数无关, 在并发程度非常高的情况下可以替换 ConcurrentHashMap 试试
+![Map相关的实现对于key和value的要求](https://static001.geekbang.org/resource/image/a2/1d/a20efe788caf4f07a4ad027639c80b1d.png)
+
+### Set
+* 实现接口: CopyOnWriteArraySet 和 ConcurrentSkipListSet 描述与之前名字相同的类似
+
+### Queue
+* 分类
+ * 阻塞与非阻塞: 队列已满,入队操作阻塞;队列为空,出队操作阻塞;Blocking 关键字标识
+ * 单端与双端: 单端-队尾入队,队首出队; 双端-队尾队首都可入队出队; 单端-Queue标识,双端-Deque标识
+
+* 单端阻塞队列
+ * 内部一般持有一个队列.
+ * ArrayBlockingQueue: 队列是数组.
+ * LinkedBlockingQueue: 队列是链表.
+ * SynchronousQueue: 不持有队列, 生产者线程入队操作必须等待消费者线程出队操作
+ * LinkedTransferQueue: 融合 LinkedBlockingQueue 和 SynchronousQueue 功能,性能比 LinkedBlockingQueue 更好
+ * PriorityBlockingQueue: 支持按优先级出队
+ * DelayQueue: 支持延时出队
+
+* 双端阻塞队列
+ * LinkedBlockingDeque
+ 
+* 单端非阻塞队列
+ * ConcurrentLinkedQueue
+* 双端非阻塞队列 
+ * ConcurrentLinkedDeque
+
+* 只有 ArrayBlockingQueue LinkedBlockingQueue 支持有界, 在使用其他队列时需要充分考虑是否存在OOM 的隐患
+
+## 21 原子类: 无锁工具类的典范
+* 无锁方案不需要加锁解锁, 不会进入阻塞状态没有线程切换,性能好
+* 方案: 
+ * CPU提供了CAS指令(Compare and Swap) 保证操作原子性. 
+ * 使用时需要传入一个期望值 expect 和写入的新值 newValue, 当当前值与expect相等时,才会将当前值更新为newValue,否则返回当前值,重新比较
+ * 使用CAS解决并发问题一般会伴随自旋(循环尝试)
+ * CAS会有ABA的问题, 即A变成了B再变成A,判断不出是否被更新过
+```java
+    void addOne() {
+        int newValue;
+        do {
+            newValue = count + 1;
+        } while (compare(count, cas(count, newValue)));//2
+    }
+
+    synchronized int cas(int expect, int newValue) {
+        count = 10;
+        int curValue = count;
+        if (curValue == expect) {
+            this.count = newValue;
+        }
+        return curValue;
+    }
+```
+* Java实现原子化
+ * compareAndSet方法返回是否更新成功
+ * 底层是native方法
+```java
+public final long getAndAddLong(
+  Object o, long offset, long delta){
+  long v;
+  do {
+    // 读取内存中的值
+    v = getLongVolatile(o, offset);
+  } while (!compareAndSwapLong(
+      o, offset, v, v + delta));
+  return v;
+}
+// 原子性地将变量更新为 x
+// 条件是内存中的值等于 expected
+// 更新成功则返回 true
+native boolean compareAndSwapLong(
+  Object o, long offset, 
+  long expected,
+  long x);
+
+```
+### 原子类概览
+* 主要分为: 原子化的基本数据类型 , 原子化的对象引用类型 , 原子化数组 , 原子化属性更新器 , 原子化的累加器
+![原子类组成该蓝图](https://static001.geekbang.org/resource/image/00/4a/007a32583fbf519469462fe61805eb4a.png)
+
+* 原子化的基本数据类型
+ * AtomicBoolean AtomicInteger AtomicLong
+ * getAndIncrement i++
+ * getAndDecrement i--
+ * incrementAndGet ++i
+ * decrementAndGet --i
+ * getAndAdd(delta) 返回+=前的值
+ * addAndGet(delta) 返回+=后的值
+ * compareAndSet(expect,update) 返回是否成功
+ * getAndUpdate(func)
+ * updateAndGet(func)
+ * getAndAccumulate(func)
+ * accumulateAndGet(func)
+* 原子化的对象引用类型
+ * AtomicReference 方法与基本数据类型相似
+ * AtomicStampedReference 解决ABA问题,添加了版本号
+ * AtomicMarkableReference 解决ABA问题,版本号->bool值
+* 原子化数组
+ * AtomicIntegerArray AtomicLongArray AtomicReferenceArray: 原子化更新数组里每一个元素 , 方法多了一个数组的索引参数
+* 原子化属性更新器
+ * AtomicIntegerFieldUpdater AtomicLongFieldUpdater AtomicReferenceFieldUpdater
+ * 方打都是用反射机制实现 , 提供了静态创建方法 newUpdater
+ * 对象属性必须是 volatile 类型 , 保证可见性
+* 原子化累加器
+ * DoubleAccumulator DoubleAdder LongAccumulator LongAddr
+ * 不支持compareAndSet 仅仅用作累加 性能更好
+ 
+## 
+ 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
