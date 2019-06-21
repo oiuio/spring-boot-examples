@@ -495,8 +495,60 @@ native boolean compareAndSwapLong(
  * DoubleAccumulator DoubleAdder LongAccumulator LongAddr
  * 不支持compareAndSet 仅仅用作累加 性能更好
  
-## 
- 
+## Executor与线程池: 如何正确的创建线程池
+* 线程是一个重量级的对象 , 应避免频繁的创建与销毁
+* 一般池化对象通过 acquire() 申请资源 release()释放资源
+* 线程池的设计采用 生产者-消费者 模式设计, 线程池的使用方是生产者 , 线程池本身是消费者
+
+### 使用Java中的线程池
+* 核心:ThreadPoolExecutor
+ * corePoolSize: 线程池保有的最小线程数量
+ * maximumPoolSize: 线程池创建的最大线程数
+ * keepAliveTime & unit: 判断空闲线程"一定时间"回收
+ * workQueue: 工作队列
+ * threadFactory: 自定义如何创建线程,e.g 给线程指定一个有意义的名字
+ * handler: 自定义任务的拒绝策略. 如果线程池都在忙碌且工作队列也满了. 此时提交任务线程池会拒绝接收
+  * CallerRunPolicy:　提交任务的线程自己执行该任务
+  * AbortPolicy: 默认的拒绝策略, throws RejectedExecutionException
+  * DiscardPolicy: 直接丢弃任务 , 没有异常抛出
+  * DiscardOldestPolicy: 丢弃最老的任务 , 吧最早进入工作队列的任务丢弃 , 把新的加入
+* 注意事项:
+ * 不建议使用Executors , 很多默认方法使用的都是无界队列 LinkedBlockingQueue , 高负载下容易OOM . 建议使用有界队列
+ * 使用有界队列默认的拒绝策略会 throw RejectedExecutionException 运行时异常 , 需要捕获. 因为默认拒绝策略要慎用. 
+ * 稳妥 & 简单 方案
+* 推荐
+ * 参照SDK:DefaultThreadFactory 自定义实现 ThreadFactory
+ * 利用Guava的ThreadFactoryBuilder
+```java
+try{
+    //业务
+}catch(RuntimeException e){
+    //按需处理
+}catch(Throwable x){
+    //按需处理
+}
+```
+  
+## Future: 如何利用多线程实现最优的 "烧水泡茶" 程序
+
+* 获取任务执行结果
+ * ThreadPoolExecutor 提供 3个submit()方法 和 1个FutureTask() 
+  * Future<?> submit(Runnable task) 提交 Runnable 任务 | 没有返回值, 仅用来断言任务已结束, 类似 Thread.join
+  * <T> Future<?> submit(Callable<T> task) 提交 Callable 任务 | 有返回值
+  * <T> Future<?> sumbit(Runnable task, T result)  提交 Runnable 任务及结果引用 | future.get()==result , 主子线程共享数据
+ * Future 接口的5个方法
+  * cancel() 取消任务
+  * isCancelled() 判断任务是否已取消
+  * isDone() 判断任务是否已结束 
+  * get() 获得执行结果
+  * get(timeout ,unit) 带超市
+ * FutureTask 
+  * FutureTask(Callable<V> callable)
+  * FutureTask(Runnable runnable,V result)
+  * 实现了 Callable 与 Runnable 所以可以直接提交给线程池
+  * get() 方法获取结果
+  
+## CompletableFuture: 异步编程没那么难
 
 
 

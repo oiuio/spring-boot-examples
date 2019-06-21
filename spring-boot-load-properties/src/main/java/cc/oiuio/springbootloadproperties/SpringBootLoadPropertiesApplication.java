@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+
 @SpringBootApplication
 @Slf4j
 public class SpringBootLoadPropertiesApplication {
@@ -17,6 +18,7 @@ public class SpringBootLoadPropertiesApplication {
         Environment environment = app.getEnvironment();
         log.debug("c.database.url={}", environment.getProperty("c.database.url"));
         log.debug("c.database.password={}", environment.getProperty("c.database.password"));
+        log.debug("c.database.username={}", environment.getProperty("c.database.username"));
 
     }
 
@@ -33,5 +35,6 @@ public class SpringBootLoadPropertiesApplication {
 //            }).start();
         }
     }
+
 
 }

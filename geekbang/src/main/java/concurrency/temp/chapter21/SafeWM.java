@@ -1,6 +1,11 @@
 package concurrency.temp.chapter21;
 
+import concurrency.temp.chapter6.Demo;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.*;
 
@@ -112,7 +117,7 @@ class 原子化的对象引用类型 {
         System.out.println(r1.get());
         List<String> s3 = new ArrayList<>();
         s3.add("3");
-        r1.compareAndSet(s3,s2);
+        r1.compareAndSet(s3, s2);
         System.out.println(r1.get());
     }
 
@@ -124,19 +129,54 @@ class 原子化的对象引用类型 {
 }
 
 class 原子化数组 {
-    AtomicIntegerArray array1;
-    AtomicLongArray array2;
-    AtomicReferenceArray array3;
 
     public static void main(String[] args) {
-
+        AtomicIntegerArray array1;
+        AtomicLongArray array2;
+        AtomicReferenceArray array3;
+        int[] integers = new int[10];
+        integers[0] = 1;
+        integers[1] = 2;
+        array1 = new AtomicIntegerArray(integers);
+        System.out.println(array1.toString());
+        array1.incrementAndGet(0);
+        System.out.println(array1.toString());
+        array1.getAndAdd(0, 5);
+        System.out.println(array1.toString());
+        array1.compareAndSet(0, 7, 1);
+        System.out.println(array1.toString());
     }
 }
 
 class 原子化对象属性更新器 {
-    AtomicIntegerFieldUpdater r1;
-    AtomicLongFieldUpdater r2;
-    AtomicReferenceFieldUpdater r3;
+
+    @Getter
+    @Setter
+    static
+    class DemoInner {
+        public volatile int i;
+
+        @Override
+        public String toString() {
+            return "DemoInner{" +
+                    "i=" + i +
+                    '}';
+        }
+    }
+
+    public static void main(String[] args) {
+        AtomicIntegerFieldUpdater r1;
+        AtomicLongFieldUpdater r2;
+        AtomicReferenceFieldUpdater r3;
+
+        AtomicIntegerFieldUpdater<DemoInner> updater = AtomicIntegerFieldUpdater.newUpdater(DemoInner.class, "i");
+        DemoInner demo = new DemoInner();
+        demo.i = 1;
+        updater.compareAndSet(demo, 1, 2);
+        System.out.println(updater.get(demo));
+
+
+    }
 }
 
 class 原子化的累加器 {
