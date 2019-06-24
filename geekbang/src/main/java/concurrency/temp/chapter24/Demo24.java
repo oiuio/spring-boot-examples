@@ -1,5 +1,6 @@
 package concurrency.temp.chapter24;
 
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
@@ -119,8 +120,6 @@ class 描述AND汇聚关系 {
 //        System.out.println(completionStage.complete(null));
 
 
-
-
         CompletableFuture<String> combine = CompletableFuture.supplyAsync(() -> "大家好");
         combine = combine.thenCombine(CompletableFuture.supplyAsync(() -> "我是菜徐坤"), (v1, v2) -> {
             System.out.println(v1);
@@ -156,7 +155,7 @@ class 描述AND汇聚关系 {
     }
 }
 
-class 描述OR汇聚关系{
+class 描述OR汇聚关系 {
 
     public static void main(String[] args) {
 //        CompletionStage applyToEither(other, fn);
@@ -167,8 +166,63 @@ class 描述OR汇聚关系{
 //        CompletionStage runAfterEitherAsync(other, action);
 
 
+        CompletableFuture<String> f1 = CompletableFuture.supplyAsync(() -> {
+            int t = getRandom(5, 10);
+            System.out.println(t);
+            sleep(t, TimeUnit.SECONDS);
+            System.out.println("f1 end");
+            return String.valueOf(t);
+        });
 
+        CompletableFuture<String> f2 = CompletableFuture.supplyAsync(() -> {
+            int t = getRandom(5, 10);
+            System.out.println(t);
+            sleep(t, TimeUnit.SECONDS);
+            System.out.println("f2 end");
+            return String.valueOf(t);
+        });
+
+        CompletableFuture<String> f3 = f1.applyToEither(f2, s -> {
+            System.out.println(s);
+            return s;
+        });
+
+        System.out.println(f3.join());
+        System.out.println("f3 end");
     }
 
+    //5-10
+    private static int getRandom(int a, int b) {
+        Random random = new Random();
+        return random.nextInt(b + 1) + a;
+    }
 
+    private static void sleep(int t, TimeUnit u) {
+        try {
+            u.sleep(t);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+}
+
+class 异常处理{
+    public static void main(String[] args) {
+//        CompletionStage exceptionally(fn);
+//        CompletionStage<R> whenComplete(consumer);不支持返回结果 第一个参数都是异常 第二个是结果
+//        CompletionStage<R> whenCompleteAsync(consumer);
+//        CompletionStage<R> handle(fn);支持返回结果
+//        CompletionStage<R> handleAsync(fn);
+
+        CompletableFuture<Integer> f0 = CompletableFuture
+                .supplyAsync(()->(7/0))
+                .thenApply(r->r*10)
+                .whenComplete((r,e)->{
+                    System.out.println("r = " + r);
+                    System.out.println("e = " + e);
+                });
+//        System.out.println(f0.join());
+
+    }
 }
