@@ -1,8 +1,9 @@
 package concurrency.temp.chapter26;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 26 Fork/Join: 单机版的MapReduce
@@ -43,7 +44,7 @@ class ForkJoin的使用 {
         Integer result = fjp.invoke(fib);
         System.out.println(result);
         long endTime = System.currentTimeMillis();
-        System.out.println("耗时: "+(endTime-startTime)/1000 );
+        System.out.println("耗时: " + (endTime - startTime) / 1000);
     }
 
 }
@@ -62,11 +63,12 @@ class Fibonacci extends RecursiveTask<Integer> {
 
     @Override
     protected Integer compute() {
-        try {
-            TimeUnit.MILLISECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+//        try {
+//            TimeUnit.NANOSECONDS.sleep(1);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
         if (n <= 1)
             return n;
@@ -76,3 +78,61 @@ class Fibonacci extends RecursiveTask<Integer> {
         return f2.compute() + f1.join();
     }
 }
+
+class 模拟MapReduce统计单词数量 {
+    public static void main(String[] args) {
+        String[] fc = {"hello world", "hello me", "hello fork", "hello join", "fork join in world"};
+        ForkJoinPool fjp = new ForkJoinPool(3);
+
+    }
+}
+
+class MR extends RecursiveTask<Map<String, Long>> {
+    private String[] fc;
+    private int start, end;
+
+    MR(String[] fc, int fr, int to) {
+        this.fc = fc;
+        this.start = fr;
+        this.end = to;
+    }
+
+    @Override
+    protected Map<String, Long> compute() {
+        return null;
+    }
+
+    //合并结果
+    private Map<String, Long> merge(Map<String, Long> r1, Map<String, Long> r2) {
+        Map<String, Long> result = new HashMap<>();
+        result.putAll(r1);
+        r2.forEach((k, v) -> {
+            Long c = result.get(k);
+            if (c != null) {
+                result.put(k, c + v);
+            } else {
+                result.put(k, v);
+            }
+        });
+        return result;
+    }
+
+    //统计单词数量
+    private Map<String, Long> calc(String line) {
+        Map<String, Long> result = new HashMap<>();
+        String[] words = line.split("\\s+");
+        for (String w : words) {
+            Long v = result.get(w);
+            if (v != null) {
+                result.put(w, v + 1);
+            } else {
+                result.put(w, 1L);
+            }
+        }
+        return result;
+    }
+
+
+}
+
+
